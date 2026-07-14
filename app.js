@@ -12,18 +12,19 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
-const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:3000', // student-facing app
   process.env.ADMIN_CLIENT_URL || 'http://localhost:3001', // admin dashboard
+  // Always allow local dev origins to hit this backend (e.g. admin dashboard
+  // developers pointing at the deployed API instead of running one locally).
+  'http://localhost:3000',
+  'http://localhost:3001',
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-      // Next.js picks a different port in dev if the configured one is busy.
-      if (!isProduction && /^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
       callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
