@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 
 const videoConsentSchema = new mongoose.Schema(
   {
-    filePath: String,
+    fileId: mongoose.Schema.Types.ObjectId, // GridFS file id
+    filePath: String, // legacy: videos stored on local disk before the GridFS migration
     originalName: String,
     mimeType: String,
     sizeBytes: Number,

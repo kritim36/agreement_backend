@@ -1,4 +1,5 @@
 import Submission from '../models/Submission.js';
+import { getVideoBucket } from '../utils/gridfs.js';
 
 export async function createSubmission(req, res, next) {
   try {
@@ -27,8 +28,18 @@ export async function uploadVideoConsent(req, res, next) {
     if (!submission) return res.status(404).json({ error: 'Submission not found' });
     if (!req.file) return res.status(400).json({ error: 'No video file received' });
 
+    const bucket = getVideoBucket();
+    const fileId = await new Promise((resolve, reject) => {
+      const uploadStream = bucket.openUploadStream(req.file.originalname, {
+        contentType: req.file.mimetype,
+      });
+      uploadStream.on('finish', () => resolve(uploadStream.id));
+      uploadStream.on('error', reject);
+      uploadStream.end(req.file.buffer);
+    });
+
     submission.videoConsent = {
-      filePath: `uploads/videos/${req.file.filename}`,
+      fileId,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
       sizeBytes: req.file.size,
