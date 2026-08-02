@@ -168,6 +168,32 @@ const siteContentSchema = new mongoose.Schema(
       default: 'This is a confidential service proposal prepared exclusively for you.',
     },
 
+    videoConsent: {
+      scriptText: {
+        type: String,
+        default:
+          'I, [Your Name], confirm that I have read and understood the service agreement, fee structure, and terms outlined above. I voluntarily agree to proceed with First Step Overseas for my study abroad application process.',
+      },
+    },
+
+    email: {
+      subject: {
+        type: String,
+        default: 'Your Agreement & Video Consent Confirmation',
+      },
+      greetingText: {
+        type: String,
+        default:
+          'Dear {{fullName}},\n\nThank you for completing your service agreement with us. Below is a summary of your agreement for your records.',
+      },
+      videoConsentText: {
+        type: String,
+        default:
+          'Your recorded video consent has been received. You can view your submission and video anytime using the link below:',
+      },
+      buttonText: { type: String, default: 'View My Submission & Video' },
+    },
+
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
   },
   { timestamps: true }

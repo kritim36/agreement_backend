@@ -1,7 +1,27 @@
 import path from 'path';
 import fs from 'fs';
 import Submission from '../models/Submission.js';
-import { getVideoBucket } from '../utils/gridfs.js';
+import { getVideoBucket, streamVideoConsent } from '../utils/gridfs.js';
+
+export async function createSubmissionByAdmin(req, res, next) {
+  try {
+    const { fullName, mobileNumber, email, desiredProgram } = req.body;
+    if (!fullName || !mobileNumber || !email || !desiredProgram) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const submission = await Submission.create({
+      fullName,
+      mobileNumber,
+      email,
+      desiredProgram,
+    });
+
+    res.status(201).json({ id: submission._id });
+  } catch (error) {
+    next(error);
+  }
+}
 
 export async function listSubmissions(req, res, next) {
   try {
@@ -55,27 +75,7 @@ export async function deleteSubmission(req, res, next) {
 export async function streamVideo(req, res, next) {
   try {
     const submission = await Submission.findById(req.params.id);
-    const consent = submission?.videoConsent;
-    if (!consent?.fileId && !consent?.filePath) {
-      return res.status(404).json({ error: 'No video consent found' });
-    }
-
-    if (consent.fileId) {
-      res.set('Content-Type', consent.mimeType || 'video/webm');
-      const downloadStream = getVideoBucket().openDownloadStream(consent.fileId);
-      downloadStream.on('error', () => {
-        if (!res.headersSent) res.status(404).json({ error: 'Video file not found' });
-      });
-      downloadStream.pipe(res);
-      return;
-    }
-
-    // Legacy videos stored on local disk before the GridFS migration.
-    const filePath = path.join(process.cwd(), consent.filePath);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: 'Video file not found' });
-    }
-    res.sendFile(filePath);
+    streamVideoConsent(submission?.videoConsent, res);
   } catch (error) {
     next(error);
   }

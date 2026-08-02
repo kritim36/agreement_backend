@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import {
+  createSubmissionByAdmin,
   listSubmissions,
   getSubmission,
   deleteSubmission,
@@ -11,6 +12,7 @@ const router = Router();
 
 router.use(requireAdmin);
 
+router.post('/', createSubmissionByAdmin);
 router.get('/', listSubmissions);
 router.get('/:id', getSubmission);
 router.delete('/:id', deleteSubmission);

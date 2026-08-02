@@ -10,6 +10,8 @@ const EDITABLE_FIELDS = [
   'universities',
   'programOptions',
   'footerTagline',
+  'videoConsent',
+  'email',
 ];
 
 export async function getContent(req, res, next) {

@@ -28,6 +28,7 @@ const submissionSchema = new mongoose.Schema(
 
     agreedAt: { type: Date, default: Date.now },
     videoConsent: { type: videoConsentSchema, default: null },
+    emailSentAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
