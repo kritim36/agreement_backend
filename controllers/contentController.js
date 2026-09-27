@@ -10,6 +10,7 @@ const EDITABLE_FIELDS = [
   'universities',
   'programOptions',
   'footerTagline',
+  'socialLinks',
   'videoConsent',
   'email',
 ];

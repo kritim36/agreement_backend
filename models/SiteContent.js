@@ -168,6 +168,16 @@ const siteContentSchema = new mongoose.Schema(
       default: 'This is a confidential service proposal prepared exclusively for you.',
     },
 
+    socialLinks: {
+      facebook: { type: String, default: '', trim: true },
+      instagram: { type: String, default: '', trim: true },
+      youtube: { type: String, default: '', trim: true },
+      linkedin: { type: String, default: '', trim: true },
+      x: { type: String, default: '', trim: true },
+      whatsapp: { type: String, default: '', trim: true },
+      website: { type: String, default: '', trim: true },
+    },
+
     videoConsent: {
       scriptText: {
         type: String,
