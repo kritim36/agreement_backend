@@ -78,3 +78,37 @@ export function buildConsentConfirmationEmail({ submission, siteContent, viewUrl
 
   return { subject: email.subject, html };
 }
+
+export function buildAdminSubmissionEmail({ submission, viewUrl }) {
+  const rows = [
+    ['Full Name', submission.fullName],
+    ['Mobile Number', submission.mobileNumber],
+    ['Email', submission.email],
+    ['Desired Program', submission.desiredProgram],
+    ['Submitted At', new Date(submission.createdAt || Date.now()).toLocaleString()],
+  ]
+    .map(
+      ([label, value]) => `
+          <tr>
+            <td style="padding:6px 10px;border:1px solid #ddd;font-weight:bold;">${label}</td>
+            <td style="padding:6px 10px;border:1px solid #ddd;">${escapeHtml(value)}</td>
+          </tr>`
+    )
+    .join('');
+
+  const html = `
+    <div style="font-family:Arial,sans-serif;color:#0a1a2f;max-width:600px;margin:0 auto;">
+      <h2 style="color:#0a1a2f;">New Student Submission</h2>
+      <table style="border-collapse:collapse;width:100%;margin:10px 0 20px;">
+        <tbody>${rows}</tbody>
+      </table>
+      <p>
+        <a href="${viewUrl}" style="display:inline-block;padding:10px 16px;background:#0a1a2f;color:#fff;text-decoration:none;border-radius:6px;">
+          View in Admin Panel
+        </a>
+      </p>
+    </div>
+  `;
+
+  return { subject: `New submission: ${submission.fullName} - ${submission.desiredProgram}`, html };
+}

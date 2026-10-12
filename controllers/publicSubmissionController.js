@@ -2,7 +2,7 @@ import Submission from '../models/Submission.js';
 import { getOrCreateSiteContent } from '../models/SiteContent.js';
 import { getVideoBucket, streamVideoConsent } from '../utils/gridfs.js';
 import { sendMail } from '../utils/mailer.js';
-import { buildConsentConfirmationEmail } from '../utils/emailTemplates.js';
+import { buildConsentConfirmationEmail, buildAdminSubmissionEmail } from '../utils/emailTemplates.js';
 
 export async function createSubmission(req, res, next) {
   try {
@@ -20,9 +20,23 @@ export async function createSubmission(req, res, next) {
     });
 
     res.status(201).json({ id: submission._id });
+
+    // Best-effort: notify the admin inbox without blocking the student.
+    sendAdminSubmissionEmail(submission).catch((error) => {
+      console.error('Failed to send admin submission email:', error.message);
+    });
   } catch (error) {
     next(error);
   }
+}
+
+async function sendAdminSubmissionEmail(submission) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL || process.env.SMTP_USER;
+  if (!to) return;
+
+  const viewUrl = `${process.env.ADMIN_CLIENT_URL || 'http://localhost:3001'}/submissions/${submission._id}`;
+  const { subject, html } = buildAdminSubmissionEmail({ submission, viewUrl });
+  await sendMail({ to, subject, html, replyTo: submission.email });
 }
 
 export async function confirmAgreement(req, res, next) {

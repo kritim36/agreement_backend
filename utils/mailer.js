@@ -17,11 +17,12 @@ function getTransporter() {
   return transporter;
 }
 
-export async function sendMail({ to, subject, html }) {
+export async function sendMail({ to, subject, html, replyTo }) {
   await getTransporter().sendMail({
     from: process.env.EMAIL_FROM || process.env.SMTP_USER,
     to,
     subject,
     html,
+    replyTo,
   });
 }

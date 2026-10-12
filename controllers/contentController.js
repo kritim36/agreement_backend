@@ -13,6 +13,7 @@ const EDITABLE_FIELDS = [
   'socialLinks',
   'videoConsent',
   'email',
+  'translations',
 ];
 
 export async function getContent(req, res, next) {

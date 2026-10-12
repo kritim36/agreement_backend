@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { DEFAULT_TRANSLATIONS } from './siteContentTranslations.js';
 
 const milestoneSchema = new mongoose.Schema(
   {
@@ -22,6 +23,58 @@ const tuitionFeeRowSchema = new mongoose.Schema(
   },
   { _id: false }
 );
+
+const milestoneTranslationSchema = new mongoose.Schema(
+  {
+    stage: { type: String, default: '' },
+    subtitle: { type: String, default: '' },
+    refundNote: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
+// Text-only overlay of the English content for one language. Empty fields fall
+// back to English on the student page; milestones and tuition programs are
+// matched to the English rows by index.
+function localizedContent(defaults) {
+  return {
+    brand: {
+      tagline: { type: String, default: defaults.brand.tagline },
+      pillBadgeText: { type: String, default: defaults.brand.pillBadgeText },
+    },
+    intro: {
+      greetingText: { type: String, default: defaults.intro.greetingText },
+      calloutText: { type: String, default: defaults.intro.calloutText },
+    },
+    feeStructure: {
+      totalChargeLabel: { type: String, default: defaults.feeStructure.totalChargeLabel },
+      totalChargeBreakdown: { type: String, default: defaults.feeStructure.totalChargeBreakdown },
+      milestoneColumnLabel: { type: String, default: defaults.feeStructure.milestoneColumnLabel },
+      milestones: {
+        type: [milestoneTranslationSchema],
+        default: () => defaults.feeStructure.milestones,
+      },
+      refundNote: { type: String, default: defaults.feeStructure.refundNote },
+    },
+    inclusions: {
+      items: { type: [String], default: () => defaults.inclusions.items },
+      bonusCallout: { type: String, default: defaults.inclusions.bonusCallout },
+    },
+    exclusions: {
+      items: { type: [String], default: () => defaults.exclusions.items },
+      note: { type: String, default: defaults.exclusions.note },
+    },
+    tuitionFees: {
+      countryLabel: { type: String, default: defaults.tuitionFees.countryLabel },
+      programs: { type: [String], default: () => defaults.tuitionFees.programs },
+    },
+    universities: { type: [String], default: () => defaults.universities },
+    footerTagline: { type: String, default: defaults.footerTagline },
+    videoConsent: {
+      scriptText: { type: String, default: defaults.videoConsent.scriptText },
+    },
+  };
+}
 
 const DEFAULT_MILESTONES = [
   {
@@ -202,6 +255,11 @@ const siteContentSchema = new mongoose.Schema(
           'Your recorded video consent has been received. You can view your submission and video anytime using the link below:',
       },
       buttonText: { type: String, default: 'View My Submission & Video' },
+    },
+
+    translations: {
+      gu: localizedContent(DEFAULT_TRANSLATIONS.gu),
+      hi: localizedContent(DEFAULT_TRANSLATIONS.hi),
     },
 
     updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
