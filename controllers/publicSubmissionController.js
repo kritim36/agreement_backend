@@ -1,4 +1,4 @@
-import Submission from '../models/Submission.js';
+import Submission, { snapshotFeeStructure } from '../models/Submission.js';
 import { getOrCreateSiteContent } from '../models/SiteContent.js';
 import { getVideoBucket, streamVideoConsent } from '../utils/gridfs.js';
 import { sendMail } from '../utils/mailer.js';
@@ -17,6 +17,7 @@ export async function createSubmission(req, res, next) {
       email,
       desiredProgram,
       agreedAt: new Date(),
+      feeStructure: snapshotFeeStructure(await getOrCreateSiteContent()),
     });
 
     res.status(201).json({ id: submission._id });
@@ -95,7 +96,12 @@ async function sendConsentConfirmationEmail(submission) {
   const siteContent = await getOrCreateSiteContent();
   const viewUrl = `${process.env.ADMIN_CLIENT_URL || 'http://localhost:3001'}/submissions/${submission._id}`;
 
-  const { subject, html } = buildConsentConfirmationEmail({ submission, siteContent, viewUrl });
+  // The email summarises the fees saved on the student's record.
+  const content = submission.feeStructure
+    ? { ...siteContent.toObject(), feeStructure: submission.feeStructure }
+    : siteContent;
+
+  const { subject, html } = buildConsentConfirmationEmail({ submission, siteContent: content, viewUrl });
   await sendMail({ to: submission.email, subject, html });
 
   submission.emailSentAt = new Date();
@@ -105,7 +111,7 @@ async function sendConsentConfirmationEmail(submission) {
 export async function getPublicSubmission(req, res, next) {
   try {
     const submission = await Submission.findById(req.params.id).select(
-      'fullName mobileNumber email desiredProgram agreedAt status videoConsent.recordedAt videoConsent.mimeType'
+      'fullName mobileNumber email desiredProgram agreedAt status feeStructure customFeeStructure videoConsent.recordedAt videoConsent.mimeType'
     );
     if (!submission) return res.status(404).json({ error: 'Submission not found' });
     res.json(submission);

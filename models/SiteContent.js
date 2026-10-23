@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { DEFAULT_TRANSLATIONS } from './siteContentTranslations.js';
 
-const milestoneSchema = new mongoose.Schema(
+export const milestoneSchema = new mongoose.Schema(
   {
     stage: { type: String, required: true },
     subtitle: { type: String, default: '' },

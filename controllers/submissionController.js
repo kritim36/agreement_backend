@@ -1,24 +1,35 @@
 import path from 'path';
 import fs from 'fs';
-import Submission from '../models/Submission.js';
+import Submission, { snapshotFeeStructure } from '../models/Submission.js';
+import { getOrCreateSiteContent } from '../models/SiteContent.js';
 import { getVideoBucket, streamVideoConsent } from '../utils/gridfs.js';
 
 export async function createSubmissionByAdmin(req, res, next) {
   try {
-    const { fullName, mobileNumber, email, desiredProgram } = req.body;
+    const { fullName, mobileNumber, email, desiredProgram, feeStructure } = req.body;
     if (!fullName || !mobileNumber || !email || !desiredProgram) {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
+    const customFeeStructure = Boolean(feeStructure);
     const submission = await Submission.create({
       fullName,
       mobileNumber,
       email,
       desiredProgram,
+      feeStructure: customFeeStructure
+        ? feeStructure
+        : snapshotFeeStructure(await getOrCreateSiteContent()),
+      customFeeStructure,
     });
 
     res.status(201).json({ id: submission._id });
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res
+        .status(400)
+        .json({ error: 'Every payment milestone needs a stage and an amount' });
+    }
     next(error);
   }
 }
