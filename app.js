@@ -17,6 +17,8 @@ const app = express();
 const allowedOrigins = [
   'https://agreement.firststepoverseas.com',
   'https://admin-agreement.firststepoverseas.com',
+  'https://agreement-admin.vercel.app',
+  'https://agreement-frontend-nu.vercel.app',
   'http://localhost:3000',
   'http://localhost:3001',
 ];
